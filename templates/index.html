@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Nube Pro Jochis</title>
+    <style>
+        body { background: #0f172a; color: white; font-family: 'Segoe UI', sans-serif; text-align: center; padding: 20px; }
+        .panel { background: #1e293b; padding: 30px; border-radius: 20px; display: inline-block; border: 2px solid #38bdf8; min-width: 400px; }
+        input[type="file"] { background: #334155; padding: 10px; border-radius: 10px; margin-bottom: 10px; }
+        button { background: #38bdf8; color: #0f172a; border: none; padding: 12px 25px; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #0ea5e9; transform: scale(1.05); }
+        #lista { margin-top: 30px; text-align: left; background: #0f172a; padding: 15px; border-radius: 10px; }
+        .archivo-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #334155; }
+        .archivo-item a { color: #38bdf8; text-decoration: none; }
+    </style>
+</head>
+<body onload="cargarArchivos()">
+
+    <div class="panel">
+        <h1>☁️ Mi Nube Personal</h1>
+        <p>Espacio libre: Ilimitado (Tu PC)</p>
+        
+        <input type="file" id="archivoInput">
+        <br>
+        <button onclick="subirArchivo()">🚀 SUBIR AHORA</button>
+
+        <div id="lista">
+            <h3>📂 Archivos en tu PC:</h3>
+            <div id="contenedor-archivos">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        async function cargarArchivos() {
+            const res = await fetch('/lista-archivos');
+            const archivos = await res.json();
+            const contenedor = document.getElementById('contenedor-archivos');
+            contenedor.innerHTML = '';
+            
+            archivos.forEach(nombre => {
+                contenedor.innerHTML += `
+                    <div class="archivo-item">
+                        <span>📄 ${nombre}</span>
+                        <a href="/descargar/${nombre}" target="_blank">📥 Descargar</a>
+                    </div>
+                `;
+            });
+        }
+
+        async function subirArchivo() {
+            const input = document.getElementById('archivoInput');
+            if (input.files.length === 0) return alert("Selecciona algo");
+
+            const formData = new FormData();
+            formData.append('archivo', input.files[0]);
+
+            const res = await fetch('/subir', { method: 'POST', body: formData });
+            
+            if (res.ok) {
+                input.value = ''; // Limpia el selector para subir otro
+                cargarArchivos(); // Recarga la lista sin refrescar la página
+            } else {
+                alert("Error al subir");
+            }
+        }
+    </script>
+</body>
+</html>
