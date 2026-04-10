@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mi Nube Total - Jochis</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { background-color: #000; color: #00ff88; font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: #111; border: 2px solid #00ff88; padding: 30px; border-radius: 15px; text-align: center; width: 400px; }
+        .btn { background: #00ff88; color: #000; border: none; padding: 15px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 20px; }
+        #status { margin-top: 20px; color: #fff; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>📁 MI NUBE TOTAL</h2>
+        <input type="file" id="archivoInput">
+        <button class="btn" onclick="ejecutarSubida()">SUBIR A LA NUBE</button>
+        <div id="status">Esperando archivo...</div>
+    </div>
+
+    <script>
+        // CONFIGURACIÓN ÚNICA
+        const URL_SUPA = "https://nlbgqewnvgdgdzyxwuvy.supabase.co";
+        const KEY_SUPA = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5sYmdxZXdudmdkZ2R6eXh3dXZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3ODU1NDUsImV4cCI6MjA5MTM2MTU0NX0.Vym7FGq_x5mc_3liQc4lUnpiUyZOEiORdV3Ao-02QmI";
+
+        // Usamos un nombre diferente para que no de error de "already declared"
+        const clienteSupa = supabase.createClient(URL_SUPA, KEY_SUPA);
+
+        async function ejecutarSubida() {
+            const input = document.getElementById('archivoInput');
+            const status = document.getElementById('status');
+            const file = input.files[0];
+
+            if (!file) return alert("Selecciona un archivo");
+
+            status.innerText = "🚀 Subiendo...";
+
+            // Asegúrate que tu cubo se llame 'archivoz' en el panel
+            const nombreFinal = Date.now() + "_" + file.name;
+            
+            const { data, error } = await clienteSupa.storage
+                .from('archivoz')
+                .upload(nombreFinal, file);
+
+            if (error) {
+                status.innerHTML = "❌ Error: " + error.message;
+            } else {
+                const { data: res } = clienteSupa.storage.from('archivoz').getPublicUrl(nombreFinal);
+                status.innerHTML = `✅ ¡LOGRADO! <br><br> <a href="${res.publicUrl}" target="_blank" style="color:black; background:#00ff88; padding:10px;">DESCARGAR AQUÍ</a>`;
+            }
+        }
+    </script>
+</body>
+</html>
